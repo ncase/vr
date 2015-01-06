@@ -77,21 +77,38 @@ function init() {
 		scene.add(mesh);
 	}
 
-	// A RUNNER
-	// MESHES WITH ANIMATED TEXTURES!
-	var runnerTexture = new THREE.ImageUtils.loadTexture('textures/sprites/bored_walk.png');
-	var animation = new TextureAnimator( runnerTexture, 5, 4, 20, 40 ); // texture, #horiz, #vert, #total, duration.
-	var runnerMaterial = new THREE.MeshBasicMaterial( { map: runnerTexture, side:THREE.DoubleSide } );
-	runnerMaterial.transparent = true;
-	runnerMaterial.depthWrite = false;
-	var runnerGeometry = new THREE.PlaneGeometry(50, 50, 1, 1);
-	window.runner = new THREE.Mesh(runnerGeometry, runnerMaterial);
-	runner.position.x = 0;
-	runner.position.z = -100;
-	runner.position.y = 25;
-	runner.rotation.y = 0;
-	runner.animation = animation;
-	scene.add(runner);
+	// ARM
+	function makeArm(){
+		
+		var texture = new THREE.ImageUtils.loadTexture('textures/sprites/arm.png');
+		var animation = new TextureAnimator( texture, 1, 1, 1, 1000 ); // texture, #horiz, #vert, #total, duration.
+		var material = new THREE.MeshBasicMaterial( { map: texture, side:THREE.DoubleSide } );
+		material.transparent = true;
+		material.depthWrite = false;
+
+		var geometry = new THREE.PlaneGeometry(20, 20, 1, 1);
+		var arm = new THREE.Mesh(geometry, material);
+		arm.animation = animation;
+
+		return arm;
+	}
+	
+	var arm = makeArm();
+	arm.position.x = 5;
+	arm.position.z = 10;
+	arm.position.y = 5.1;
+	arm.rotation.y = -Math.PI/2;
+	arm.rotateOnAxis(new THREE.Vector3(1,0,0), -Math.PI/2);
+	window.stroker = arm;
+	scene.add(arm);
+
+	var arm = makeArm();
+	arm.position.x = 5;
+	arm.position.z = -10 + 2;
+	arm.position.y = 5;
+	arm.rotation.y = Math.PI/2;
+	arm.rotateOnAxis(new THREE.Vector3(1,0,0), Math.PI/2);
+	scene.add(arm);
 
 	// A MONOLITH
 	window.monos = [];
@@ -131,20 +148,21 @@ function resize() {
   effect.setSize(width, height);
 }
 
-var runAngle = 0;
+var strokeT = 0;
 function update(dt) {
   resize();
 
   camera.updateProjectionMatrix();
-  runner.animation.update(dt*1000);
+
+  
+  strokeT+=0.01;
+  //var triangleWave = Math.abs((strokeT%2)-1);
+  window.stroker.position.x = Math.sin(strokeT)*5;
+  window.stroker.position.z = Math.sin(strokeT)*3+2 + 2;
+
   for(var i=0;i<8;i++){
   	monos[i].animation.update(dt*1000);
   }
-
-  runAngle-=0.005;
-  runner.rotation.y = runAngle;
-  runner.position.z = -Math.cos(runAngle)*100;
-  runner.position.x = -Math.sin(runAngle)*100;
 
   controls.update(dt);
 }
